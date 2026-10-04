@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -14,7 +14,15 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  TextField,
+  InputAdornment,
+  Paper,
+  Tabs,
+  Tab,
+  Stack,
+  Divider,
+  Avatar
 } from '@mui/material';
 import Header from '../components/Header';
 import {
@@ -23,12 +31,20 @@ import {
   CalendarToday,
   LocationOn,
   Star,
-  Login as LoginIcon,
-  PersonAdd,
-  DarkMode,
-  LightMode
+  Search,
+  ConfirmationNumber,
+  AccountBalanceWallet,
+  QrCodeScanner,
+  Loyalty,
+  Theaters,
+  Movie as MovieIcon,
+  Shield,
+  LocalActivity,
+  ArrowForward,
+  Close
 } from '@mui/icons-material';
-// Import movie poster images
+
+// Poster assets
 import cinema1 from '../assets/cimena1.jpg';
 import cinema2 from '../assets/cinema2.jpg';
 import cinema3 from '../assets/cinema3.jpg';
@@ -36,117 +52,135 @@ import cinema4 from '../assets/cinema4.jpg';
 import cinema5 from '../assets/cinema5.jpg';
 import cinema6 from '../assets/cinema6.jpg';
 
+const initialMovies = [
+  {
+    id: 1,
+    title: 'Avengers: Endgame',
+    genre: 'Action',
+    duration: 181,
+    rating: 4.8,
+    language: 'English',
+    poster: cinema1,
+    tagline: 'Part of the journey is the end.',
+    description: 'After the devastating events of Infinity War, the universe is in ruins. With the help of remaining allies, the Avengers assemble once more to reverse Thanos’ actions.',
+    showtimes: ['14:00', '17:30', '21:00'],
+    theaters: ['CineMax Kigali', 'Century Cinemax'],
+    price: 'RWF 5,000',
+    trailerId: 'TcMBFSGVi1c',
+    featured: true
+  },
+  {
+    id: 2,
+    title: 'Spider-Man: No Way Home',
+    genre: 'Action',
+    duration: 148,
+    rating: 4.7,
+    language: 'English',
+    tagline: 'The Multiverse unleashed.',
+    poster: cinema2,
+    description: 'With Spider-Man identity revealed, Peter asks Doctor Strange for help. When a spell goes wrong, dangerous foes from other worlds start to appear.',
+    showtimes: ['15:30', '18:45', '22:00'],
+    theaters: ['CineMax Kigali', 'Century Cinemax'],
+    price: 'RWF 5,000',
+    trailerId: 'JfVOs4VSpmA',
+    featured: true
+  },
+  {
+    id: 3,
+    title: 'The Batman',
+    genre: 'Action',
+    duration: 176,
+    rating: 4.5,
+    language: 'English',
+    tagline: 'Unmask the truth.',
+    poster: cinema3,
+    description: 'In his second year of fighting crime, Batman uncovers corruption in Gotham City that connects to his own family while facing a serial killer known as the Riddler.',
+    showtimes: ['16:00', '19:30'],
+    theaters: ['Century Cinemax'],
+    price: 'RWF 4,500',
+    trailerId: 'mqqft2x_Aa4',
+    featured: false
+  },
+  {
+    id: 4,
+    title: 'Top Gun: Maverick',
+    genre: 'Drama',
+    duration: 130,
+    rating: 4.9,
+    language: 'English',
+    tagline: 'Feel the need for speed.',
+    poster: cinema4,
+    description: 'After thirty years, Maverick is still pushing the envelope as a top naval aviator, but must confront ghosts of his past leading TOP GUN elite graduates.',
+    showtimes: ['14:30', '20:15'],
+    theaters: ['CineMax Kigali'],
+    price: 'RWF 5,500',
+    trailerId: 'giXco2jaZ_4',
+    featured: true
+  },
+  {
+    id: 5,
+    title: 'Interstellar',
+    genre: 'Sci-Fi',
+    duration: 169,
+    rating: 4.9,
+    language: 'English',
+    tagline: 'Mankind was born on Earth. It was never meant to die here.',
+    poster: cinema5,
+    description: 'When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot is tasked to pilot a spacecraft, along with a team of researchers, to find a new planet for humans.',
+    showtimes: ['15:00', '19:00', '22:30'],
+    theaters: ['CineMax Kigali', 'Century Cinemax'],
+    price: 'RWF 6,000',
+    trailerId: 'zSWdZVtXT7E',
+    featured: true
+  },
+  {
+    id: 6,
+    title: 'Inception',
+    genre: 'Sci-Fi',
+    duration: 148,
+    rating: 4.8,
+    language: 'English',
+    tagline: 'Your mind is the scene of the crime.',
+    poster: cinema6,
+    description: 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.',
+    showtimes: ['16:30', '20:30'],
+    theaters: ['Century Cinemax'],
+    price: 'RWF 4,500',
+    trailerId: 'YoHD9XEInc0',
+    featured: false
+  }
+];
+
+const genres = ['All', 'Action', 'Sci-Fi', 'Drama', 'Comedy', 'Horror'];
+
 const Home = ({ darkMode, toggleDarkMode }) => {
-  const [movies, setMovies] = useState([]);
+  const [movies] = useState(initialMovies);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState('All');
   const [selectedMovie, setSelectedMovie] = useState(null);
+  const [trailerMovie, setTrailerMovie] = useState(null);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchMovies();
-  }, []);
-
-  const fetchMovies = async () => {
-    // Mock data - replace with actual API call
-    const mockMovies = [
-      {
-        id: 1,
-        title: 'Avengers: Endgame',
-        genre: 'Action/Adventure',
-        duration: 181,
-        rating: 4.8,
-        language: 'English',
-        poster: cinema1,
-        description: 'The epic conclusion to the Infinity Saga that will forever change the Marvel Cinematic Universe.',
-        showtimes: ['14:00', '17:30', '21:00'],
-        theaters: ['Grand Cinema Hall 1', 'Royal Theater Screen 2'],
-        price: 'From RWF 2,500'
-      },
-      {
-        id: 2,
-        title: 'Spider-Man: No Way Home',
-        genre: 'Action/Adventure',
-        duration: 148,
-        rating: 4.6,
-        language: 'English',
-        poster: cinema2,
-        description: 'Spider-Man faces villains from across the multiverse in this thrilling adventure.',
-        showtimes: ['15:30', '18:45', '22:00'],
-        theaters: ['City Cinema Hall A', 'Grand Cinema Hall 2'],
-        price: 'From RWF 2,800'
-      },
-      {
-        id: 3,
-        title: 'The Batman',
-        genre: 'Action/Crime',
-        duration: 176,
-        rating: 4.4,
-        language: 'English',
-        poster: cinema3,
-        description: 'A new take on the Dark Knight as he uncovers corruption in Gotham City.',
-        showtimes: ['16:00', '19:30'],
-        theaters: ['Royal Theater Screen 1'],
-        price: 'From RWF 2,200'
-      },
-      {
-        id: 4,
-        title: 'Top Gun: Maverick',
-        genre: 'Action/Drama',
-        duration: 130,
-        rating: 4.7,
-        language: 'English',
-        poster: cinema4,
-        description: 'Maverick returns to the danger zone for one last mission.',
-        showtimes: ['14:30', '20:15'],
-        theaters: ['Grand Cinema IMAX'],
-        price: 'From RWF 3,500'
-      },
-      {
-        id: 5,
-        title: 'Ubwiyunge',
-        genre: 'Drama/History',
-        duration: 120,
-        rating: 4.9,
-        language: 'Kinyarwanda',
-        poster: cinema5,
-        description: 'A powerful story of reconciliation in Rwanda, exploring themes of forgiveness and healing.',
-        showtimes: ['15:00', '18:00'],
-        theaters: ['Kigali Cultural Center'],
-        price: 'From RWF 1,500'
-      },
-      {
-        id: 6,
-        title: 'amataha',
-        genre: 'Drama/War',
-        duration: 95,
-        rating: 4.5,
-        language: 'Kinyarwanda/French',
-        poster: cinema6,
-        description: 'A compelling story of war and reconciliation, depicting Rwanda\'s journey through conflict to peace.',
-        showtimes: ['16:30', '19:00'],
-        theaters: ['Rwanda Cinema'],
-        price: 'From RWF 1,800'
-
-      }
-    ];
-    setMovies(mockMovies);
-  };
+  const filteredMovies = movies.filter((movie) => {
+    const matchesSearch = movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          movie.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesGenre = selectedGenre === 'All' || movie.genre.toLowerCase() === selectedGenre.toLowerCase();
+    return matchesSearch && matchesGenre;
+  });
 
   const handleMovieClick = (movie) => {
     setSelectedMovie(movie);
   };
 
-  const handleBookNow = () => {
-    setSelectedMovie(null);
-    setLoginDialogOpen(true);
-  };
-
-  const handleLogin = () => {
-    navigate('/login');
-  };
-
-  const handleRegister = () => {
-    navigate('/register');
+  const handleBookNow = (movieId) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate(`/booking/${movieId || 1}`);
+    } else {
+      setSelectedMovie(null);
+      setLoginDialogOpen(true);
+    }
   };
 
   const formatDuration = (minutes) => {
@@ -157,239 +191,499 @@ const Home = ({ darkMode, toggleDarkMode }) => {
 
   return (
     <>
-      {/* Single Header Component */}
       <Header
         isAuthenticated={false}
         user={null}
-        onLogout={() => { }}
+        onLogout={() => {}}
         darkMode={darkMode}
         toggleDarkMode={toggleDarkMode}
       />
 
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
-        {/* Hero Section */}
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography variant="h2" component="h1" gutterBottom fontWeight="bold">
-            Welcome to CinemaHub! 🎭
+      {/* Hero Section */}
+      <Box
+        sx={{
+          background: darkMode
+            ? 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.3), rgba(255, 255, 255, 0))'
+            : 'linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%)',
+          color: 'white',
+          pt: { xs: 8, md: 10 },
+          pb: { xs: 8, md: 12 },
+          px: 2,
+          textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: { xs: '0 0 24px 24px', md: '0 0 40px 40px' },
+          boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+        }}
+      >
+        <Container maxWidth="lg">
+          <Chip
+            icon={<Star sx={{ color: '#ffd700 !important' }} />}
+            label="Experience Cinema in 4K Ultra HD & Dolby Atmos"
+            sx={{
+              bgcolor: 'rgba(255, 255, 255, 0.15)',
+              color: 'white',
+              backdropFilter: 'blur(10px)',
+              fontWeight: 600,
+              mb: 3,
+              px: 1,
+              py: 0.5
+            }}
+          />
+
+          <Typography
+            variant="h2"
+            component="h1"
+            gutterBottom
+            sx={{
+              fontWeight: 800,
+              fontSize: { xs: '2.4rem', sm: '3.4rem', md: '4.2rem' },
+              letterSpacing: '-0.5px',
+              textShadow: '0 4px 20px rgba(0,0,0,0.3)'
+            }}
+          >
+            Book Movie Tickets <br />
+            <Box
+              component="span"
+              sx={{
+                background: 'linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}
+            >
+              Anytime, Anywhere.
+            </Box>
           </Typography>
-          <Typography variant="h5" color="text.secondary" paragraph>
-            Choose your favorite movies and book your tickets online
+
+          <Typography
+            variant="h6"
+            sx={{
+              maxWidth: 720,
+              mx: 'auto',
+              mb: 4,
+              opacity: 0.9,
+              fontWeight: 400,
+              lineHeight: 1.6
+            }}
+          >
+            Discover current box-office hits, choose premium seats with our real-time interactive map, and receive instant digital QR code tickets.
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            We have the latest movies, Rwandan films, and much more!
+
+          {/* Quick Action Buttons */}
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            justifyContent="center"
+            sx={{ mb: 5 }}
+          >
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<ConfirmationNumber />}
+              onClick={() => navigate('/login')}
+              sx={{
+                bgcolor: '#ff3366',
+                color: 'white',
+                px: 4,
+                py: 1.5,
+                fontSize: '1.05rem',
+                fontWeight: 700,
+                borderRadius: '50px',
+                boxShadow: '0 8px 25px rgba(255, 51, 102, 0.4)',
+                '&:hover': { bgcolor: '#e62e5c' }
+              }}
+            >
+              Browse & Book Tickets
+            </Button>
+            <Button
+              variant="outlined"
+              size="large"
+              startIcon={<PlayArrow />}
+              onClick={() => setTrailerMovie(movies[0])}
+              sx={{
+                borderColor: 'rgba(255,255,255,0.6)',
+                color: 'white',
+                px: 3.5,
+                py: 1.5,
+                fontSize: '1.05rem',
+                fontWeight: 600,
+                borderRadius: '50px',
+                backdropFilter: 'blur(10px)',
+                '&:hover': {
+                  borderColor: 'white',
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                }
+              }}
+            >
+              Watch Featured Trailer
+            </Button>
+          </Stack>
+
+          {/* Highlights Ribbon */}
+          <Grid container spacing={2} justifyContent="center" sx={{ mt: 2 }}>
+            {[
+              { icon: <Theaters />, label: 'Multiple Cities & Theaters' },
+              { icon: <QrCodeScanner />, label: 'Instant QR Tickets' },
+              { icon: <AccountBalanceWallet />, label: 'Wallet & Card Payments' },
+              { icon: <Loyalty />, label: 'Loyalty Rewards Points' }
+            ].map((feat, idx) => (
+              <Grid item xs={6} sm={3} key={idx}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 1,
+                    p: 1.5,
+                    borderRadius: 3,
+                    bgcolor: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(8px)'
+                  }}
+                >
+                  {feat.icon}
+                  <Typography variant="body2" fontWeight={600}>
+                    {feat.label}
+                  </Typography>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Main Content Area */}
+      <Container maxWidth="lg" sx={{ mt: 6, mb: 10 }}>
+        {/* Search & Filter Bar */}
+        <Paper
+          elevation={4}
+          sx={{
+            p: 3,
+            mb: 6,
+            borderRadius: 4,
+            background: darkMode ? 'rgba(26, 31, 58, 0.8)' : '#ffffff',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}
+        >
+          <Grid container spacing={3} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                placeholder="Search movies by title, genre, or keyword..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search color="primary" />
+                    </InputAdornment>
+                  )
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 3
+                  }
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+                {genres.map((genre) => (
+                  <Chip
+                    key={genre}
+                    label={genre}
+                    clickable
+                    color={selectedGenre === genre ? 'primary' : 'default'}
+                    variant={selectedGenre === genre ? 'filled' : 'outlined'}
+                    onClick={() => setSelectedGenre(genre)}
+                    sx={{
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      px: 0.5
+                    }}
+                  />
+                ))}
+              </Box>
+            </Grid>
+          </Grid>
+        </Paper>
+
+        {/* Section Title */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 4 }}>
+          <Box>
+            <Typography variant="overline" color="primary" fontWeight={800} letterSpacing={1.2}>
+              NOW SHOWING IN CINEMAS
+            </Typography>
+            <Typography variant="h4" fontWeight={800}>
+              Featured Movies
+            </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary">
+            Showing {filteredMovies.length} movie{filteredMovies.length !== 1 ? 's' : ''}
           </Typography>
         </Box>
 
-        {/* Movies Section */}
-        <Typography variant="h4" component="h2" gutterBottom sx={{ mb: 4 }}>
-          🎬 Now Showing
-        </Typography>
-
-        <Grid container spacing={3}>
-          {movies.map((movie) => (
+        {/* Movies Grid */}
+        <Grid container spacing={3.5}>
+          {filteredMovies.map((movie) => (
             <Grid item xs={12} sm={6} md={4} key={movie.id}>
               <Card
                 sx={{
                   height: '100%',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderRadius: 4,
+                  overflow: 'hidden',
+                  position: 'relative',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
                   '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 4
+                    transform: 'translateY(-8px)',
+                    boxShadow: '0 16px 40px rgba(0,0,0,0.2)'
                   }
                 }}
-                onClick={() => handleMovieClick(movie)}
               >
-                <CardMedia
-                  component="img"
-                  height="300"
-                  image={movie.poster}
-                  alt={movie.title}
-                />
-                <CardContent>
-                  <Typography variant="h6" component="h3" gutterBottom noWrap>
+                {/* Poster Container */}
+                <Box sx={{ position: 'relative', height: 380, overflow: 'hidden' }}>
+                  <CardMedia
+                    component="img"
+                    image={movie.poster}
+                    alt={movie.title}
+                    sx={{
+                      height: '100%',
+                      width: '100%',
+                      objectFit: 'cover',
+                      transition: 'transform 0.5s ease',
+                      '&:hover': {
+                        transform: 'scale(1.05)'
+                      }
+                    }}
+                  />
+                  {/* Rating Badge */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 14,
+                      right: 14,
+                      bgcolor: 'rgba(0, 0, 0, 0.75)',
+                      color: '#ffd700',
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      backdropFilter: 'blur(6px)',
+                      fontWeight: 700,
+                      fontSize: '0.9rem'
+                    }}
+                  >
+                    <Star sx={{ fontSize: 18 }} />
+                    {movie.rating}
+                  </Box>
+
+                  {/* Genre Badge */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 14,
+                      left: 14,
+                      bgcolor: 'primary.main',
+                      color: 'white',
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: 2,
+                      fontWeight: 700,
+                      fontSize: '0.8rem',
+                      textTransform: 'uppercase'
+                    }}
+                  >
+                    {movie.genre}
+                  </Box>
+
+                  {/* Play Trailer Overlay Button */}
+                  <Box
+                    onClick={() => setTrailerMovie(movie)}
+                    sx={{
+                      position: 'absolute',
+                      bottom: 14,
+                      right: 14,
+                      bgcolor: 'rgba(255, 51, 102, 0.9)',
+                      color: 'white',
+                      p: 1.2,
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 4px 15px rgba(255, 51, 102, 0.5)',
+                      transition: 'transform 0.2s',
+                      '&:hover': {
+                        transform: 'scale(1.1)',
+                        bgcolor: '#ff3366'
+                      }
+                    }}
+                  >
+                    <PlayArrow />
+                  </Box>
+                </Box>
+
+                <CardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                  <Typography variant="h6" fontWeight={700} gutterBottom noWrap>
                     {movie.title}
                   </Typography>
 
-                  <Box display="flex" alignItems="center" gap={1} mb={1}>
-                    <Rating value={movie.rating} precision={0.1} size="small" readOnly />
-                    <Typography variant="body2" color="text.secondary">
-                      ({movie.rating})
-                    </Typography>
-                  </Box>
-
-                  <Box display="flex" gap={1} mb={2} flexWrap="wrap">
-                    <Chip label={movie.genre} size="small" color="primary" variant="outlined" />
-                    <Chip label={movie.language} size="small" color="secondary" variant="outlined" />
-                  </Box>
-
-                  <Box display="flex" alignItems="center" gap={1} mb={1}>
-                    <AccessTime fontSize="small" color="action" />
-                    <Typography variant="body2" color="text.secondary">
-                      {formatDuration(movie.duration)}
-                    </Typography>
-                  </Box>
-
-                  <Typography variant="h6" color="primary" fontWeight="bold">
-                    {movie.price}
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      mb: 2,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      lineHeight: 1.5
+                    }}
+                  >
+                    {movie.description}
                   </Typography>
+
+                  <Stack direction="row" spacing={2} sx={{ mb: 2, color: 'text.secondary', fontSize: '0.85rem' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <AccessTime sx={{ fontSize: 16 }} />
+                      {formatDuration(movie.duration)}
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Theaters sx={{ fontSize: 16 }} />
+                      {movie.theaters.length} Locations
+                    </Box>
+                  </Stack>
+
+                  <Box sx={{ mt: 'auto', pt: 2, borderTop: '1px solid rgba(0,0,0,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" display="block">
+                        Ticket Price
+                      </Typography>
+                      <Typography variant="subtitle1" fontWeight={800} color="primary">
+                        {movie.price}
+                      </Typography>
+                    </Box>
+
+                    <Button
+                      variant="contained"
+                      size="medium"
+                      startIcon={<LocalActivity />}
+                      onClick={() => handleBookNow(movie.id)}
+                      sx={{
+                        borderRadius: 3,
+                        px: 2.5,
+                        py: 0.8,
+                        fontWeight: 700,
+                        textTransform: 'none'
+                      }}
+                    >
+                      Book Seat
+                    </Button>
+                  </Box>
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
 
-        {/* Features Section */}
-        <Box sx={{ mt: 8, mb: 6 }}>
-          <Typography variant="h4" component="h2" gutterBottom textAlign="center">
-            Why Choose CinemaHub? 🌟
-          </Typography>
-
-          <Grid container spacing={4} sx={{ mt: 2 }}>
-            <Grid item xs={12} md={4}>
-              <Box textAlign="center">
-                <Typography variant="h2">🎫</Typography>
-                <Typography variant="h6" gutterBottom>
-                  Easy Booking
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Book your tickets online quickly and easily
-                </Typography>
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Box textAlign="center">
-                <Typography variant="h2">🏆</Typography>
-                <Typography variant="h6" gutterBottom>
-                  Great Movies
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  We have the latest Hollywood movies and great Rwandan films
-                </Typography>
-              </Box>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <Box textAlign="center">
-                <Typography variant="h2">💰</Typography>
-                <Typography variant="h6" gutterBottom>
-                  Great Prices
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Affordable prices and earn loyalty points with every booking
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
+        {filteredMovies.length === 0 && (
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              No movies found matching "{searchQuery}"
+            </Typography>
+            <Button
+              variant="outlined"
+              onClick={() => { setSearchQuery(''); setSelectedGenre('All'); }}
+              sx={{ mt: 2, borderRadius: 3 }}
+            >
+              Reset Filters
+            </Button>
+          </Box>
+        )}
       </Container>
 
-      {/* Movie Details Dialog */}
+      {/* Trailer Modal */}
       <Dialog
-        open={!!selectedMovie}
-        onClose={() => setSelectedMovie(null)}
+        open={Boolean(trailerMovie)}
+        onClose={() => setTrailerMovie(null)}
         maxWidth="md"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            overflow: 'hidden',
+            bgcolor: '#000'
+          }
+        }}
       >
-        {selectedMovie && (
-          <>
-            <DialogTitle>
-              <Typography variant="h5" component="h2">
-                {selectedMovie.title}
-              </Typography>
-              <Box display="flex" alignItems="center" gap={1} mt={1}>
-                <Rating value={selectedMovie.rating} precision={0.1} size="small" readOnly />
-                <Typography variant="body2" color="text.secondary">
-                  ({selectedMovie.rating}) • {selectedMovie.genre} • {formatDuration(selectedMovie.duration)}
-                </Typography>
-              </Box>
-            </DialogTitle>
-
-            <DialogContent>
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={4}>
-                  <img
-                    src={selectedMovie.poster}
-                    alt={selectedMovie.title}
-                    style={{ width: '100%', borderRadius: '8px' }}
-                  />
-                </Grid>
-
-                <Grid item xs={12} md={8}>
-                  <Typography variant="body1" paragraph>
-                    {selectedMovie.description}
-                  </Typography>
-
-                  <Box mb={2}>
-                    <Typography variant="h6" gutterBottom>
-                      <CalendarToday fontSize="small" sx={{ mr: 1 }} />
-                      Showtimes
-                    </Typography>
-                    <Box display="flex" gap={1} flexWrap="wrap">
-                      {selectedMovie.showtimes.map((time, index) => (
-                        <Chip key={index} label={time} variant="outlined" />
-                      ))}
-                    </Box>
-                  </Box>
-
-                  <Box mb={2}>
-                    <Typography variant="h6" gutterBottom>
-                      <LocationOn fontSize="small" sx={{ mr: 1 }} />
-                      Theaters
-                    </Typography>
-                    {selectedMovie.theaters.map((theater, index) => (
-                      <Typography key={index} variant="body2" color="text.secondary">
-                        • {theater}
-                      </Typography>
-                    ))}
-                  </Box>
-
-                  <Typography variant="h5" color="primary" fontWeight="bold">
-                    {selectedMovie.price}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </DialogContent>
-
-            <DialogActions>
-              <Button onClick={() => setSelectedMovie(null)}>
-                Close
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleBookNow}
-                startIcon={<PlayArrow />}
-              >
-                Book Tickets
-              </Button>
-            </DialogActions>
-          </>
-        )}
+        <DialogTitle sx={{ color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }}>
+          <Typography variant="h6" fontWeight={700}>
+            🎬 {trailerMovie?.title} — Official Trailer
+          </Typography>
+          <Button onClick={() => setTrailerMovie(null)} sx={{ color: 'white', minWidth: 'auto' }}>
+            <Close />
+          </Button>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, height: { xs: 260, sm: 420, md: 480 } }}>
+          {trailerMovie && (
+            <iframe
+              width="100%"
+              height="100%"
+              src={`https://www.youtube-nocookie.com/embed/${trailerMovie.trailerId}?autoplay=1`}
+              title={trailerMovie.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          )}
+        </DialogContent>
       </Dialog>
 
       {/* Login Prompt Dialog */}
-      <Dialog open={loginDialogOpen} onClose={() => setLoginDialogOpen(false)}>
-        <DialogTitle>
-          Login or Register
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body1" paragraph>
-            To book tickets, you need to login or register to our system first.
+      <Dialog
+        open={loginDialogOpen}
+        onClose={() => setLoginDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 4, p: 1 } }}
+      >
+        <DialogTitle sx={{ textAlign: 'center', pt: 3 }}>
+          <Avatar sx={{ bgcolor: 'primary.main', mx: 'auto', mb: 1, width: 56, height: 56 }}>
+            <ConfirmationNumber />
+          </Avatar>
+          <Typography variant="h5" fontWeight={700}>
+            Ready to Book?
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            It's easy and takes just a few minutes!
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary" paragraph>
+            Please log in or create an account to choose your seats, redeem loyalty points, and download digital tickets.
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setLoginDialogOpen(false)}>
-            Close
+        <DialogActions sx={{ flexDirection: 'column', gap: 1.5, px: 3, pb: 3 }}>
+          <Button
+            fullWidth
+            variant="contained"
+            size="large"
+            onClick={() => navigate('/login')}
+            sx={{ borderRadius: 3, py: 1.2, fontWeight: 700 }}
+          >
+            Sign In to Continue
           </Button>
-          <Button onClick={handleRegister} variant="outlined">
-            Register
-          </Button>
-          <Button onClick={handleLogin} variant="contained">
-            Login
+          <Button
+            fullWidth
+            variant="outlined"
+            size="large"
+            onClick={() => navigate('/register')}
+            sx={{ borderRadius: 3, py: 1.2, fontWeight: 700 }}
+          >
+            Create Free Account
           </Button>
         </DialogActions>
       </Dialog>
@@ -398,5 +692,3 @@ const Home = ({ darkMode, toggleDarkMode }) => {
 };
 
 export default Home;
-
-
