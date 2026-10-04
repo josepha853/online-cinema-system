@@ -112,11 +112,13 @@ class BookingController {
                         $qr_path = QRCodeGenerator::generateTicketQR($qr_data);
                         
                         // Create ticket record with QR code
-                        global $conn;
-                        $stmt = $conn->prepare("INSERT INTO tickets (order_item_id, qr_code_url) VALUES (?, ?)");
+                        $dbTicket = new Database();
+                        $connTicket = $dbTicket->getConnection();
+                        $stmt = $connTicket->prepare("INSERT INTO tickets (order_item_id, qr_code_url) VALUES (?, ?)");
                         $stmt->bind_param("is", $order_item_id, $qr_path);
                         $stmt->execute();
                         $stmt->close();
+                        $dbTicket->closeConnection();
                     } else {
                         $success = false;
                         break;

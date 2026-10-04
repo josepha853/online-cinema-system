@@ -9,8 +9,8 @@ class ExportController {
     private $conn;
     
     public function __construct() {
-        global $conn;
-        $this->conn = $conn;
+        $database = new Database();
+        $this->conn = $database->getConnection();
     }
     
     /**

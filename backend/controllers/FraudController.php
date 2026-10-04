@@ -45,7 +45,8 @@ class FraudController {
         $exceeded_limit = $this->fraudDetection->hasExceededBookingLimit($user_id);
         
         // Get user's bookings
-        global $conn;
+        $database = new Database();
+        $conn = $database->getConnection();
         $stmt = $conn->prepare("
             SELECT COUNT(*) as total_bookings,
                    SUM(CASE WHEN status = 'paid' THEN 1 ELSE 0 END) as paid_bookings,
@@ -58,6 +59,7 @@ class FraudController {
         $result = $stmt->get_result();
         $stats = $result->fetch_assoc();
         $stmt->close();
+        $database->closeConnection();
         
         header('Content-Type: application/json');
         echo json_encode([

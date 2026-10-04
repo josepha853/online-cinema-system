@@ -22,7 +22,8 @@ import {
   AdminPanelSettings,
   Assessment,
   DarkMode,
-  LightMode
+  LightMode,
+  QrCodeScanner
 } from '@mui/icons-material';
 import NotificationCenter from './NotificationCenter';
 import logoCinema from '../assets/logo_cinema.jpg';
@@ -56,6 +57,12 @@ const Header = ({ isAuthenticated, user, onLogout, darkMode, toggleDarkMode }) =
     { path: '/my-bookings', label: 'My Bookings', icon: <ConfirmationNumber /> },
   ];
 
+  const staffMenuItems = [
+    { path: '/dashboard', label: 'Staff Dashboard', icon: <QrCodeScanner /> },
+    { path: '/movies', label: 'Movies', icon: <Movie /> },
+    { path: '/theaters', label: 'Theaters', icon: <LocationOn /> },
+  ];
+
   const adminMenuItems = [
     { path: '/admin/dashboard', label: 'Admin Dashboard', icon: <AdminPanelSettings /> },
     { path: '/admin/movies', label: 'Manage Movies', icon: <Movie /> },
@@ -65,7 +72,11 @@ const Header = ({ isAuthenticated, user, onLogout, darkMode, toggleDarkMode }) =
     { path: '/admin/reports', label: 'Reports', icon: <Assessment /> },
   ];
 
-  const menuItems = user?.role === 'admin' ? adminMenuItems : customerMenuItems;
+  const menuItems = user?.role === 'admin' 
+    ? adminMenuItems 
+    : user?.role === 'staff' 
+      ? staffMenuItems 
+      : customerMenuItems;
 
   return (
     <AppBar position="static" sx={{ bgcolor: 'primary.main' }}>
