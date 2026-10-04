@@ -352,47 +352,49 @@ const Home = ({ darkMode, toggleDarkMode }) => {
       </Box>
 
       {/* Main Content Area */}
-      <Container maxWidth="lg" sx={{ mt: 6, mb: 10 }}>
+      <Container maxWidth={false} sx={{ maxWidth: '1480px', mt: 5, mb: 10, px: { xs: 2, md: 3 } }}>
         {/* Search & Filter Bar */}
         <Paper
-          elevation={4}
+          elevation={3}
           sx={{
-            p: 3,
-            mb: 6,
-            borderRadius: 4,
-            background: darkMode ? 'rgba(26, 31, 58, 0.8)' : '#ffffff',
+            p: 2.5,
+            mb: 4,
+            borderRadius: 3,
+            background: darkMode ? 'rgba(26, 31, 58, 0.85)' : '#ffffff',
             backdropFilter: 'blur(12px)',
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }}
         >
-          <Grid container spacing={3} alignItems="center">
-            <Grid item xs={12} md={6}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={5}>
               <TextField
                 fullWidth
-                placeholder="Search movies by title, genre, or keyword..."
+                size="small"
+                placeholder="Search movies by title or keyword..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Search color="primary" />
+                      <Search color="primary" fontSize="small" />
                     </InputAdornment>
                   )
                 }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    borderRadius: 3
+                    borderRadius: 2.5
                   }
                 }}
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={7}>
               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
                 {genres.map((genre) => (
                   <Chip
                     key={genre}
                     label={genre}
+                    size="small"
                     clickable
                     color={selectedGenre === genre ? 'primary' : 'default'}
                     variant={selectedGenre === genre ? 'filled' : 'outlined'}
@@ -410,12 +412,12 @@ const Home = ({ darkMode, toggleDarkMode }) => {
         </Paper>
 
         {/* Section Title */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 3 }}>
           <Box>
             <Typography variant="overline" color="primary" fontWeight={800} letterSpacing={1.2}>
               NOW SHOWING IN CINEMAS
             </Typography>
-            <Typography variant="h4" fontWeight={800}>
+            <Typography variant="h5" fontWeight={800}>
               Featured Movies
             </Typography>
           </Box>
@@ -424,173 +426,185 @@ const Home = ({ darkMode, toggleDarkMode }) => {
           </Typography>
         </Box>
 
-        {/* Movies Grid */}
-        <Grid container spacing={3.5}>
+        {/* 5-Column Responsive Movies Grid */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: 'repeat(1, 1fr)',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 1fr)',
+              lg: 'repeat(5, 1fr)'
+            },
+            gap: 2.5
+          }}
+        >
           {filteredMovies.map((movie) => (
-            <Grid item xs={12} sm={6} md={4} key={movie.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  borderRadius: 4,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: '0 16px 40px rgba(0,0,0,0.2)'
-                  }
-                }}
-              >
-                {/* Poster Container */}
-                <Box sx={{ position: 'relative', height: 380, overflow: 'hidden' }}>
-                  <CardMedia
-                    component="img"
-                    image={movie.poster}
-                    alt={movie.title}
-                    sx={{
-                      height: '100%',
-                      width: '100%',
-                      objectFit: 'cover',
-                      transition: 'transform 0.5s ease',
-                      '&:hover': {
-                        transform: 'scale(1.05)'
-                      }
-                    }}
-                  />
-                  {/* Rating Badge */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 14,
-                      right: 14,
-                      bgcolor: 'rgba(0, 0, 0, 0.75)',
-                      color: '#ffd700',
-                      px: 1.5,
-                      py: 0.5,
-                      borderRadius: 2,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.5,
-                      backdropFilter: 'blur(6px)',
-                      fontWeight: 700,
-                      fontSize: '0.9rem'
-                    }}
-                  >
-                    <Star sx={{ fontSize: 18 }} />
-                    {movie.rating}
-                  </Box>
-
-                  {/* Genre Badge */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      top: 14,
-                      left: 14,
-                      bgcolor: 'primary.main',
-                      color: 'white',
-                      px: 1.5,
-                      py: 0.5,
-                      borderRadius: 2,
-                      fontWeight: 700,
-                      fontSize: '0.8rem',
-                      textTransform: 'uppercase'
-                    }}
-                  >
-                    {movie.genre}
-                  </Box>
-
-                  {/* Play Trailer Overlay Button */}
-                  <Box
-                    onClick={() => setTrailerMovie(movie)}
-                    sx={{
-                      position: 'absolute',
-                      bottom: 14,
-                      right: 14,
-                      bgcolor: 'rgba(255, 51, 102, 0.9)',
-                      color: 'white',
-                      p: 1.2,
-                      borderRadius: '50%',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 4px 15px rgba(255, 51, 102, 0.5)',
-                      transition: 'transform 0.2s',
-                      '&:hover': {
-                        transform: 'scale(1.1)',
-                        bgcolor: '#ff3366'
-                      }
-                    }}
-                  >
-                    <PlayArrow />
-                  </Box>
+            <Card
+              key={movie.id}
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                borderRadius: 3,
+                overflow: 'hidden',
+                position: 'relative',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                '&:hover': {
+                  transform: 'translateY(-6px)',
+                  boxShadow: '0 12px 30px rgba(0,0,0,0.18)'
+                }
+              }}
+            >
+              {/* Poster Container */}
+              <Box sx={{ position: 'relative', height: 230, overflow: 'hidden' }}>
+                <CardMedia
+                  component="img"
+                  image={movie.poster}
+                  alt={movie.title}
+                  sx={{
+                    height: '100%',
+                    width: '100%',
+                    objectFit: 'cover',
+                    transition: 'transform 0.4s ease',
+                    '&:hover': {
+                      transform: 'scale(1.06)'
+                    }
+                  }}
+                />
+                {/* Rating Badge */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    bgcolor: 'rgba(0, 0, 0, 0.8)',
+                    color: '#ffd700',
+                    px: 1,
+                    py: 0.3,
+                    borderRadius: 1.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.3,
+                    backdropFilter: 'blur(6px)',
+                    fontWeight: 700,
+                    fontSize: '0.78rem'
+                  }}
+                >
+                  <Star sx={{ fontSize: 14 }} />
+                  {movie.rating}
                 </Box>
 
-                <CardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Typography variant="h6" fontWeight={700} gutterBottom noWrap>
-                    {movie.title}
-                  </Typography>
+                {/* Genre Badge */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 10,
+                    left: 10,
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                    px: 1,
+                    py: 0.3,
+                    borderRadius: 1.5,
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  {movie.genre}
+                </Box>
 
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
+                {/* Play Trailer Overlay Button */}
+                <Box
+                  onClick={() => setTrailerMovie(movie)}
+                  sx={{
+                    position: 'absolute',
+                    bottom: 10,
+                    right: 10,
+                    bgcolor: 'rgba(255, 51, 102, 0.95)',
+                    color: 'white',
+                    p: 0.9,
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(255, 51, 102, 0.5)',
+                    transition: 'transform 0.2s',
+                    '&:hover': {
+                      transform: 'scale(1.12)',
+                      bgcolor: '#ff3366'
+                    }
+                  }}
+                >
+                  <PlayArrow sx={{ fontSize: 18 }} />
+                </Box>
+              </Box>
+
+              <CardContent sx={{ p: 2, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="subtitle1" fontWeight={700} gutterBottom noWrap sx={{ fontSize: '0.95rem' }}>
+                  {movie.title}
+                </Typography>
+
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    mb: 1.5,
+                    fontSize: '0.78rem',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    lineHeight: 1.45
+                  }}
+                >
+                  {movie.description}
+                </Typography>
+
+                <Stack direction="row" spacing={1.5} sx={{ mb: 1.5, color: 'text.secondary', fontSize: '0.75rem' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
+                    <AccessTime sx={{ fontSize: 14 }} />
+                    {formatDuration(movie.duration)}
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.4 }}>
+                    <Theaters sx={{ fontSize: 14 }} />
+                    {movie.theaters.length} Halls
+                  </Box>
+                </Stack>
+
+                <Box sx={{ mt: 'auto', pt: 1.5, borderTop: '1px solid rgba(0,0,0,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" display="block" sx={{ fontSize: '0.68rem' }}>
+                      Price
+                    </Typography>
+                    <Typography variant="body2" fontWeight={800} color="primary" sx={{ fontSize: '0.85rem' }}>
+                      {movie.price}
+                    </Typography>
+                  </Box>
+
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<LocalActivity sx={{ fontSize: '14px !important' }} />}
+                    onClick={() => handleBookNow(movie.id)}
                     sx={{
-                      mb: 2,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      lineHeight: 1.5
+                      borderRadius: 2,
+                      px: 1.5,
+                      py: 0.5,
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      textTransform: 'none'
                     }}
                   >
-                    {movie.description}
-                  </Typography>
-
-                  <Stack direction="row" spacing={2} sx={{ mb: 2, color: 'text.secondary', fontSize: '0.85rem' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <AccessTime sx={{ fontSize: 16 }} />
-                      {formatDuration(movie.duration)}
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Theaters sx={{ fontSize: 16 }} />
-                      {movie.theaters.length} Locations
-                    </Box>
-                  </Stack>
-
-                  <Box sx={{ mt: 'auto', pt: 2, borderTop: '1px solid rgba(0,0,0,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <Typography variant="caption" color="text.secondary" display="block">
-                        Ticket Price
-                      </Typography>
-                      <Typography variant="subtitle1" fontWeight={800} color="primary">
-                        {movie.price}
-                      </Typography>
-                    </Box>
-
-                    <Button
-                      variant="contained"
-                      size="medium"
-                      startIcon={<LocalActivity />}
-                      onClick={() => handleBookNow(movie.id)}
-                      sx={{
-                        borderRadius: 3,
-                        px: 2.5,
-                        py: 0.8,
-                        fontWeight: 700,
-                        textTransform: 'none'
-                      }}
-                    >
-                      Book Seat
-                    </Button>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
+                    Book
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
           ))}
-        </Grid>
+        </Box>
 
         {filteredMovies.length === 0 && (
           <Box sx={{ textAlign: 'center', py: 8 }}>
